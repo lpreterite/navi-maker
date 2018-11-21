@@ -1,23 +1,48 @@
 {
-  "name": "vue-sitemap-mixin",
   "version": "0.1.0",
+  "name": "vue-sitemap",
   "description": "用于管理导航、面包屑及路由等基于vue的功能整合",
-  "main": "index.js",
+  "main": "./src/index.js",
   "directories": {
-    "doc": "doc",
-    "test": "test"
+    "doc": "docs",
+    "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
+    "build:umd": "cross-env NODE_ENV=umd webpack --mode=development --progress --hide-modules",
+    "build:umd:min": "cross-env NODE_ENV=umd:min webpack --mode=production --progress --hide-modules",
+    "build:es": "cross-env NODE_ENV=es webpack --mode=production --progress --hide-modules",
+    "build:commonjs": "cross-env NODE_ENV=commonjs webpack --mode=production --progress --hide-modules"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "cross-env": "^5.2.0",
+    "webpack": "^4.26.0",
+    "webpack-cli": "^3.1.2"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lpreterite/vue-sitemap-mixin.git"
+    "url": "git+https://github.com/lpreterite/vue-sitemap.git"
   },
+  "keywords": [
+    "sitemap",
+    "vue",
+    "plugin"
+  ],
   "author": "packy-tang <lpreterite@126.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lpreterite/vue-sitemap-mixin/issues"
+    "url": "https://github.com/lpreterite/vue-sitemap/issues"
   },
-  "homepage": "https://github.com/lpreterite/vue-sitemap-mixin#readme"
+  "homepage": "https://github.com/lpreterite/vue-sitemap#readme",
+  "nyc": {
+    "include": [
+      "src/**/*.(js|vue)"
+    ],
+    "instrument": false,
+    "sourceMap": false
+  }
 }
