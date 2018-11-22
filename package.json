@@ -9,19 +9,27 @@
   },
   "scripts": {
     "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
-    "build:umd": "cross-env NODE_ENV=umd webpack --mode=development --progress --hide-modules",
+    "build:umd": "cross-env NODE_ENV=umd webpack --mode=production --progress --hide-modules",
     "build:umd:min": "cross-env NODE_ENV=umd:min webpack --mode=production --progress --hide-modules",
     "build:es": "cross-env NODE_ENV=es webpack --mode=production --progress --hide-modules",
-    "build:commonjs": "cross-env NODE_ENV=commonjs webpack --mode=production --progress --hide-modules"
+    "build:commonjs": "cross-env NODE_ENV=commonjs webpack --mode=production --progress --hide-modules",
+    "test": "cross-env NODE_ENV=test nyc mocha-webpack -u tdd --full-trace --timeout 9999999 --colors tests/**/*.spec.js"
   },
   "dependencies": {},
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.5",
+    "babel-plugin-istanbul": "^5.1.0",
     "babel-preset-env": "^1.7.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "cross-env": "^5.2.0",
+    "mocha": "^5.2.0",
+    "mocha-webpack": "^2.0.0-beta.0",
+    "nyc": "^13.1.0",
     "webpack": "^4.26.0",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "webpack-node-externals": "^1.7.2"
   },
   "repository": {
     "type": "git",
@@ -40,7 +48,7 @@
   "homepage": "https://github.com/lpreterite/vue-sitemap#readme",
   "nyc": {
     "include": [
-      "src/**/*.(js|vue)"
+      "src/**"
     ],
     "instrument": false,
     "sourceMap": false
