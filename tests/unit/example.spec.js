@@ -13,13 +13,13 @@
 // })
 
 
-import { assert } from "chai";
-import { default as sitemap, concatArray } from "@/index";
+// import { assert } from "chai";
+// import { default as sitemap, concatArray } from "@/index";
 
-describe('Testing', ()=>{
-  it('export default is Array', ()=>{
-    const a = [1,2,3]
-    const b = [...sitemap]
-    assert.isArray(concatArray(a, b));
-  })
-})
+// describe('Testing', ()=>{
+//   it('export default is Array', ()=>{
+//     const a = [1,2,3]
+//     const b = [...sitemap]
+//     assert.isArray(concatArray(a, b));
+//   })
+// })

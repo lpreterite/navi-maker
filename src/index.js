@@ -1,8 +1,16 @@
-const a = [1,2,3]
-const b = [4,5]
+class Sitemap {
+    constructor(map){
+        this._map = map
+    }
+    getRoutes(keys){
+        return []
+    }
+    renderNavigation(keys, render){
 
-export function concatArray(...arrays){
-    return [].concat(...arrays)
+    }
+    getCrumb(metas){
+        
+    }
 }
 
-export default concatArray(a, b);
+export default Sitemap;

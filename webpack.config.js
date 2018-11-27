@@ -1,5 +1,6 @@
 const package = require("./package.json");
 const path = require("path");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
 const config = {
     mode: "development",
@@ -16,12 +17,17 @@ const config = {
     module: {
         rules: [
             {
+                test: /\.vue$/,
+                loader: "vue-loader"
+            },
+            {
                 test: /\.js$/,
                 loader: "babel-loader",
                 exclude: /node_modules/
             }
         ]
-    }
+    },
+    plugins: [new VueLoaderPlugin()]
 };
 
 if (process.env.NODE_ENV === "umd") {
