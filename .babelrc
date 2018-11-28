@@ -6,7 +6,8 @@
                 "useBuiltIns": false,
                 "modules": false
             }
-        ]
+        ],
+        "stage-2"
     ],
     "env": {
         "test": {

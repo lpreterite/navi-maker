@@ -90,8 +90,7 @@ export default [
 sitemap
     .getRoutes([
         "dashboard",
-        "member",
-        "member-detail",
+        ["member",["member-detail"]],
         "membership",
         "user-vip"
     ]) //to vue-router

@@ -10,8 +10,7 @@ describe('sitemap testing...', () => {
         it('result is Array', () => {
             assert.isArray(_sitemap.getRoutes([
                 "dashboard",
-                "member",
-                "member-detail",
+                ["member", ["member-detail"]],
                 "membership",
                 "user-vip"
             ]));
