@@ -185,7 +185,7 @@ console.log(routes)
 | 变量名称 | 类型   | 描述                                 |
 | -------- | ------ | ------------------------------------ |
 | rules | Array<String> | 可选，层级规则，默认为初次化函数存入的规则内容 |
-| handler | Function |   可选，节点搜索函数，用于组织节点内容。默认为Maker内部的处理。 |
+| handler | Function |   可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
 
 ### 获取导航
 
@@ -317,7 +317,7 @@ console.log(navi)/**
 | 变量名称 | 类型   | 描述                                 |
 | -------- | ------ | ------------------------------------ |
 | rules | Array<String> | 可选，层级规则，默认为初次化函数存入的规则内容 |
-| handler | Function |  可选，节点搜索函数，用于组织节点内容。默认为Maker内部的处理。 |
+| handler | Function |  可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
 
 
 ### 获取面包屑
@@ -395,7 +395,7 @@ console.log(crumb)
 | 变量名称 | 类型   | 描述                                 |
 | -------- | ------ | ------------------------------------ |
 | nodeName | String | 必须，节点名称，对应节点集合中的节点名称 |
-| handler | Function |  可选，节点搜索函数，用于组织节点内容。默认为Maker内部的处理。 |
+| handler | Function |  可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
 
 ### 获取网站地图
 
@@ -442,6 +442,28 @@ console.log(sitemap)
 ```
 
 获取所有节点内容，实则返回的就是初次化时传入的节点集合内容。
+
+### 节点搜索函数
+
+```js
+import naviMaker from "@packy-tang/navi-maker"
+function handler({
+  targetName,      //节点名称，用于搜索节点
+  nodes,           //节点集合，用于搜索节点
+  level,           //节点层级，
+  type,            //层级结构的节点描述类型，0为字符串；1为数组，例如：`['+posts', ['posts/draf','posts/publish']]`；2为对象，例如：`{name:'dashboard'}`；
+  node,            //节点内容，目前只有type为2时，这个才会有值，内容与层级结构节点一致，如：`{name:'dashboard'}`
+}={}){
+  let result = nodes.find(node=>node.name==targetName)
+  return result
+}
+
+naviMaker.init({
+  nodes: [...],
+})
+const navi = naviMaker.getNavi(['dashboard'], handler)
+console.log(navi)
+```
 
 ## 开发（Develop）
 
