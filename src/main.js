@@ -75,13 +75,14 @@ function NaviMaker() {
       }
     },
     crumb: {
-      handler({node,targetName,nodes}){
+      handler({node,targetName,nodes,level}){
         let result = nodes.find(node=>node.name==targetName)
         if(!!result){
           const {title,redirect} = result.meta||{}
           result = {
             ...result,
             ...(node||{}),
+            level,
             title,
             path: (node||{}).path || redirect
           }

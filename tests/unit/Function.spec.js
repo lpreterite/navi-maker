@@ -141,6 +141,9 @@ describe('NaviMaker', () => {
         'children'
       )
     })
+    it('允许meta字段不存在', () => {
+      // expect(yeah()).to.equal("yeah!")
+    })
     it('输出结构必须与输入结构一致', () => {
       // expect(yeah()).to.equal("yeah!")
     })
