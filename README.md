@@ -465,6 +465,11 @@ const navi = naviMaker.getNavi(['dashboard'], handler)
 console.log(navi)
 ```
 
+### 其他函数
+
+- findNode 根据名称获得树中的节点。
+- findNodePath 根据名称获得节点至顶节点完整路径。
+
 ## 开发（Develop）
 
 本地开发
