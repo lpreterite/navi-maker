@@ -18,6 +18,7 @@ function findNodePath(target, nodes = []) {
 }
 
 function stuff(tree, nodes, opts={}){
+  const nodeTypes = ['string','array', 'object']
   const {
     handler=({targetName,nodes})=>nodes.find(node=>node.name==targetName),
     level=0
@@ -25,22 +26,26 @@ function stuff(tree, nodes, opts={}){
   return tree.map(nodeName=>{
     const getNode = opts=>handler(opts)
     const type = typeof nodeName == 'string' ? 0 : [String,Array,Object].findIndex(constructor=>nodeName instanceof constructor)
-    let node;
+    let result, node;
     switch(type){
       case 0:
-        node = getNode({targetName:nodeName,level,type,nodes})
+        node = { name: nodeName, nodeType:nodeTypes[type] }
+        result = getNode({targetName:nodeName,level,nodes,node})
         break;
       case 1:
-        node = getNode({targetName:nodeName[0],level,type,nodes})
-        node&&(node.children = stuff(nodeName[1], nodes, {level:level+1, handler}))
+        node = { name: nodeName[0], nodeType:nodeTypes[type], children:nodeName[1]  }
+        result = getNode({targetName:nodeName[0],level,nodes, node})
+        result&&(result.children = stuff(nodeName[1], nodes, {level:level+1, handler}))
         break;
       case 2:
-        node = getNode({targetName:nodeName.key,level,type,nodes, node:nodeName})
-        node&&(node.children = stuff(nodeName.children, nodes, {level:level+1, handler}))
+        node = { nodeType:nodeTypes[type], children:[], ...(nodeName||{}) }
+        if(typeof node.name === 'undefined'){ throw new Error("树节点为Object时，必须带上name属性") }
+        result = getNode({targetName:node.name,level,nodes, node})
+        result&&(result.children = stuff(node.children, nodes, {level:level+1, handler}))
         break;
     }
-    if(!node) throw new Error(`在Nodes资源中找不到名为${nodeName}的节点！`)
-    return node
+    if(!result) throw new Error(`在Nodes资源中找不到名为${nodeName}的节点！`)
+    return result
   })
 }
 
@@ -51,6 +56,7 @@ function NaviMaker() {
 
   const rules = {
     navi: {
+      //遍历节点，并处理输出的方法
       handler({node,targetName,nodes,level,type}){
         let result = nodes.find(node=>node.name==targetName)
         if(!!result){
@@ -69,12 +75,14 @@ function NaviMaker() {
       }
     },
     route: {
+      //遍历节点，并处理输出的方法
       handler({targetName,nodes}){
         let node = nodes.find(node=>node.name==targetName)
         return node ? { ...node, children:node.children||[] } : undefined
       }
     },
     crumb: {
+      //遍历节点，并处理输出的方法
       handler({node,targetName,nodes,level}){
         let result = nodes.find(node=>node.name==targetName)
         if(!!result){
