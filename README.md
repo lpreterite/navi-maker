@@ -4,12 +4,7 @@
 
 ## 功能（Features）
 
-配一次导航生成路由、面包屑、网站地图数据。解决零散的配置内容，用于辅佐项目的长期维护。
-
-- 输入节点集合
-- 根据路由结构输出路由配置
-- 根据导航结构输出导航配置
-- 根据节点名称输出面包屑
+一次配置可生成导航、路由、面包屑或网站地图等数据。解决零散的配置内容，用于辅佐项目的长期维护。
 
 ## 安装（Install）
 
@@ -20,343 +15,187 @@ $ npm i @packy-tang/navi-maker
 
 ## 使用（How to Use）
 
-### 初次化
+### 使用例子
 
 ```js
-import naviMaker from "@packy-tang/navi-maker"
+import VueRouter from "vue-router";
+import {stuff,findNode,getRoute,getNavi,getSitemap,getCrumb} from "@packy-tang/navi-maker"
 
-const routeRule = [
-  [
-    "home",
-    [
-      "dashboard",
-      "posts/draf",
-      "posts/publish",
-      "posts/trash",
-    ]
-  ],
-  "login"
-]
-
-const naviRule = [
-  "dashboard",
-  [
-    "+posts",
-    [
-      "posts/draf",
-      "posts/publish",
-      ["+other",["posts/trash"]]
-    ]
-  ]
-]
-
-naviMaker.init({
-  nodes: [...],
-  routes: routeRule,
-  navi: naviRule
-})
-```
-
-初次化数据，输入内容会保存至maker内部，用于后续其他函数使用。
-
-| 变量名称 | 类型   | 描述                                 |
-| -------- | ------ | ------------------------------------ |
-| nodes | Array<Object> | 必要，无层级结构的节点集合 |
-| routes | Array<String> |   可选，路由的层级结构规则 |
-| navi | Array<String> | 可选，导航的层级结构规则 |
-
-### 获取路由
-
-```js
-import naviMaker from "@packy-tang/navi-maker"
-
-const routeRule = [
-  [
-    "home",
-    [
-      "dashboard",
-      "posts/draf",
-      "posts/publish",
-      "posts/trash",
-    ]
-  ],
-  "login"
-]
-
-const naviRule = [
-  "dashboard",
-  [
-    "+posts",
-    [
-      "posts/draf",
-      "posts/publish",
-      ["+other",["posts/trash"]]
-    ]
-  ]
-]
-
-naviMaker.init({
-  nodes: [...],
-  routes: routeRule,
-  navi: naviRule
-})
-
-
-const routes = naviMaker.getRoute()
-
-console.log(routes)
-/**
- * 输出结果：详情见 test/route.json
- * 
-[
+//网站节点树
+const tree = [
   {
     "name": "home",
-    "path": "/",
-    "meta": {
-      "title": "首页"
+    "route":{
+      "path": "/",
+      "meta": {
+        "title": "首页",
+      },
+      "component": "../pages/commons/Layout.vue",
     },
-    "component": "../pages/commons/Layout.vue",
     "children": [
       {
         "name": "dashboard",
-        "path": "dashboard",
-        "meta": {
-          "title": "仪表盘"
+        "route": {
+          "path": "dashboard",
+          "meta": {
+            "title": "仪表盘",
+          },
+          "component": "../pages/Dashboard.vue",
         },
-        "component": "../pages/Dashboard.vue",
-        "children": []
+        "navi": {
+          "title": "仪表盘",
+          "path": "/dashboard?query=111"
+        }
       },
       {
-        "name": "posts/draf",
-        "path": "/posts/draf",
-        "meta": {
-          "title": "草稿箱",
-          "nav": {
-            "open": "+posts",
-            "active": "posts/draf"
-          }
+        "name":"+posts",
+        "navi": {
+          "title": "文章库",
+          "path": "/posts/draf"
         },
-        "component": "../pages/Dashboard.vue",
-        "children": []
+        "children": [
+          {
+            "name":"posts/draf",
+            "route": {
+              "path": "/posts/draf",
+              "meta": {
+                "title": "草稿箱",
+              },
+              "component": "../pages/Dashboard.vue",
+            },
+            "navi": {
+              "title": "草稿箱",
+            }
+          },
+          {
+            "name":"posts/publish",
+            "route":{
+              "path": "/posts/publish",
+              "meta": {
+                "title": "发布库",
+              },
+              "component": "../pages/Dashboard.vue",
+            },
+            "navi": {
+              "title": "发布库",
+            },
+          },
+          {
+            "name":"+other",
+            "navi": {
+              "title": "其他",
+            },
+            "children": [
+              {
+                "name":"posts/trash",
+                "route": {
+                  "path": "/posts/trash",
+                  "meta": {
+                    "title": "垃圾桶",
+                  },
+                  "component": "../pages/Dashboard.vue"
+                },
+                "navi": {
+                  "title": "垃圾桶",
+                },
+              },
+            ]
+          },
+        ]
       },
-      {
-        "name": "posts/publish",
-        "path": "/posts/publish",
-        "meta": {
-          "title": "发布库",
-          "nav": {
-            "open": "+posts",
-            "active": "posts/publish"
-          }
-        },
-        "component": "../pages/Dashboard.vue",
-        "children": []
-      },
-      {
-        "name": "posts/trash",
-        "path": "/posts/trash",
-        "meta": {
-          "title": "垃圾桶",
-          "nav": {
-            "open": "+posts",
-            "active": "posts/trash"
-          }
-        },
-        "component": "../pages/Dashboard.vue",
-        "children": []
-      }
     ]
   },
   {
     "name": "login",
-    "path": "/auth/login",
-    "meta": {
-      "title": "登录"
-    },
-    "component": "../pages/Login.vue",
-    "children": []
-  }
+    "route": {
+      "path": "/auth/login",
+      "meta": {
+        "title": "登录",
+      },
+      "component": "../pages/Login.vue",
+    }
+  },
 ]
-*/
+
+//获取路由配置
+const routes = stuff(getRoute(nodes), [], { handler:({node},{handler,stuff})=>{
+  //输出Vue-Router的数据格式
+  const rotue = (node.route||{})
+  return {
+    name: node.name,
+    ...route,
+    children: stuff(node.children, [], {handler,stuff})
+  }
+} })
+
+//创建Vue路由
+const router = new VueRouter({
+  routes,
+  strict: conf.debug
+});
+
+//获取导航配置
+const navi = stuff(getNavi(nodes), [], { handler:({node,level},{handler,stuff})=>{
+  //输出导航组件使用的数据格式
+  const navi = node.navi||{}
+  const route = router.getRoutes().find(i=>i.name==node.name)
+  const routeNode = router.resolve({ name: node.name })
+
+  return {
+    name: node.name,
+    title: navi.title,
+    path: navi.path || (route?routeNode.route.path:''),
+    shown: typeof navi.shown == 'undefined' ? true : navi.shown,
+    children: stuff(node.children, [], {handler,stuff})
+  }
+} })
+
+//获取全站节点
+const sitemap = getSitemap(nodes)
+
+//获取
+const crumb = getCrumb("posts/trash", navi)
+
 ```
 
-获取完整的路由规则
+配置的树节点说明，以下是包含的字段：
 
-| 变量名称 | 类型   | 描述                                 |
+| 字段 | 类型   | 描述                                 |
 | -------- | ------ | ------------------------------------ |
-| rules | Array<String> | 可选，层级规则，默认为初次化函数存入的规则内容 |
-| handler | Function |   可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
+| name | String | 必要，路由或是导航的标记（请用英文） |
+| route | Object | 可选，路由字段。`getRoute()`方法根据此字段存在与否来获取节点。 |
+| navi | Object | 可选，导航字段。`getNavi()`方法根据此字段存在与否来获取节点。 |
+| level | Number | 保留字段，内部使用。记录和计算节点所在层级。 |
+| children | Array<Node> | 保留字段，内部使用。子节点集合。 |
+
+### 获取路由
+
+```js
+import {getRoute} from "@packy-tang/navi-maker"
+
+const routes = getRoute(tree)
+```
+
+获取路由树，输入网站节点树，返回只包含路由属性的树。
+
 
 ### 获取导航
 
 ```js
-import naviMaker from "@packy-tang/navi-maker"
+import {getNavi} from "@packy-tang/navi-maker"
 
-const routeRule = [
-  [
-    "home",
-    [
-      "dashboard",
-      "posts/draf",
-      "posts/publish",
-      "posts/trash",
-    ]
-  ],
-  "login"
-]
-
-const naviRule = [
-  "dashboard",
-  [
-    "+posts",
-    [
-      "posts/draf",
-      "posts/publish",
-      ["+other",["posts/trash"]]
-    ]
-  ]
-]
-
-naviMaker.init({
-  nodes: [...],
-  routes: routeRule,
-  navi: naviRule
-})
-
-
-const navi = naviMaker.getNavi()
-
-console.log(navi)/**
- * 输出结果：详情见 test/navi.json
- * 
-[
-  {
-    "name": "dashboard",
-    "meta": {
-      "title": "仪表盘"
-    },
-    "component": "../pages/Dashboard.vue",
-    "level": 0,
-    "type": 0,
-    "title": "仪表盘",
-    "children": []
-  },
-  {
-    "name": "+posts",
-    "meta": {
-      "title": "文章库"
-    },
-    "level": 0,
-    "type": 1,
-    "title": "文章库",
-    "children": [
-      {
-        "name": "posts/draf",
-        "meta": {
-          "title": "草稿箱",
-          "nav": {
-            "open": "+posts",
-            "active": "posts/draf"
-          }
-        },
-        "component": "../pages/Dashboard.vue",
-        "level": 1,
-        "type": 0,
-        "title": "草稿箱",
-        "children": []
-      },
-      {
-        "name": "posts/publish",
-        "meta": {
-          "title": "发布库",
-          "nav": {
-            "open": "+posts",
-            "active": "posts/publish"
-          }
-        },
-        "component": "../pages/Dashboard.vue",
-        "level": 1,
-        "type": 0,
-        "title": "发布库",
-        "children": []
-      },
-      {
-        "name": "+other",
-        "meta": {
-          "title": "其他"
-        },
-        "level": 1,
-        "type": 1,
-        "title": "其他",
-        "children": [
-          {
-            "name": "posts/trash",
-            "meta": {
-              "title": "垃圾桶",
-              "nav": {
-                "open": "+posts",
-                "active": "posts/trash"
-              }
-            },
-            "component": "../pages/Dashboard.vue",
-            "level": 2,
-            "type": 0,
-            "title": "垃圾桶",
-            "children": []
-          }
-        ]
-      }
-    ]
-  }
-]
-*/
+const navi = getNavi(tree)
 ```
 
-获取完整的导航规则
-
-| 变量名称 | 类型   | 描述                                 |
-| -------- | ------ | ------------------------------------ |
-| rules | Array<String> | 可选，层级规则，默认为初次化函数存入的规则内容 |
-| handler | Function |  可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
+获取导航树，输入网站节点树，返回只包含导航属性的树。
 
 
 ### 获取面包屑
 
 ```js
-import naviMaker from "@packy-tang/navi-maker"
+import {getCrumb} from "@packy-tang/navi-maker"
 
-const routeRule = [
-  [
-    "home",
-    [
-      "dashboard",
-      "posts/draf",
-      "posts/publish",
-      "posts/trash",
-    ]
-  ],
-  "login"
-]
-
-const naviRule = [
-  "dashboard",
-  [
-    "+posts",
-    [
-      "posts/draf",
-      "posts/publish",
-      ["+other",["posts/trash"]]
-    ]
-  ]
-]
-
-naviMaker.init({
-  nodes: [...],
-  routes: routeRule,
-  navi: naviRule
-})
-
-const crumb = naviMaker.getCrumb("posts/trash")
+const crumb = getCrumb("posts/trash", navi)
 
 console.log(crumb)
 /**
@@ -395,80 +234,80 @@ console.log(crumb)
 | 变量名称 | 类型   | 描述                                 |
 | -------- | ------ | ------------------------------------ |
 | nodeName | String | 必须，节点名称，对应节点集合中的节点名称 |
-| handler | Function |  可选，[节点搜索函数](#节点搜索函数)，用于组织节点内容。默认为Maker内部的处理。 |
+| tree | Array<Node> | 必须，节点树，用于在节点树中查找内容。 |
 
 ### 获取网站地图
 
 ```js
-import naviMaker from "@packy-tang/navi-maker"
+import {getSitemap} from "@packy-tang/navi-maker"
 
-const routeRule = [
-  [
-    "home",
-    [
-      "dashboard",
-      "posts/draf",
-      "posts/publish",
-      "posts/trash",
-    ]
-  ],
-  "login"
-]
-
-const naviRule = [
-  "dashboard",
-  [
-    "+posts",
-    [
-      "posts/draf",
-      "posts/publish",
-      ["+other",["posts/trash"]]
-    ]
-  ]
-]
-
-naviMaker.init({
-  nodes: [...],
-  routes: routeRule,
-  navi: naviRule
-})
-
-const sitemap = naviMaker.getSitemap()
-
-console.log(sitemap)
-/**
- * 输出结果与nodes节点集合一致。
-*/
+const sitemap = getSitemap(tree)
 ```
 
-获取所有节点内容，实则返回的就是初次化时传入的节点集合内容。
+获取所有节点内容。
 
-### 节点搜索函数
+| 变量名称 | 类型   | 描述                                 |
+| -------- | ------ | ------------------------------------ |
+| tree | Array<Node> | 必须，节点树，所有输出节点均来自这棵树。 |
+
+### 其他函数
+
+- `stuff(tree, nodes, {handler()})` 遍历并填充内容的函数，可递归使用。
+- `flat(tree)` 扁平树状结构，将树状结构压平为数组。
+- `combo(nodes, tree)` 组合函数，根据父级节点的离散数据再组合。
+- `findNode()` 根据名称获得树中的节点。
+- `findNodePath()` 根据名称获得节点至顶节点完整路径。
+
+stuff 使用例子
 
 ```js
-import naviMaker from "@packy-tang/navi-maker"
+import { stuff, getRoute } from "@packy-tang/navi-maker"
 function handler({
   targetName,      //节点名称，用于搜索节点
   nodes,           //节点集合，用于搜索节点
   level,           //节点层级，
   type,            //层级结构的节点描述类型，0为字符串；1为数组，例如：`['+posts', ['posts/draf','posts/publish']]`；2为对象，例如：`{name:'dashboard'}`；
   node,            //节点内容，目前只有type为2时，这个才会有值，内容与层级结构节点一致，如：`{name:'dashboard'}`
-}={}){
-  let result = nodes.find(node=>node.name==targetName)
-  return result
+}={},{
+  handler,         //填充函数，用于递归处理
+  stuff            //函数，用于递归处理
+}){
+  const rotue = (node.route||{})
+  return {
+    name: node.name,
+    ...route,
+    children: stuff(node.children, [], {handler,stuff})
+  }
 }
 
-naviMaker.init({
-  nodes: [...],
-})
-const navi = naviMaker.getNavi(['dashboard'], handler)
+const routes = stuff(getRoute(nodes), [], {handler})
+
 console.log(navi)
 ```
 
-### 其他函数
+## 数据定义
 
-- findNode 根据名称获得树中的节点。
-- findNodePath 根据名称获得节点至顶节点完整路径。
+### 节点定义
+
+```json
+{
+  "name": "dashboard",
+  "route": {...},
+  "navi": {...},
+  "parentName": "",
+  "level": 2,
+  "children": [...],
+}
+```
+
+| 字段 | 类型   | 描述                                 |
+| -------- | ------ | ------------------------------------ |
+| name | String | 必要，路由或是导航的标记（请用英文） |
+| route | Object | 可选，路由字段。`getRoute()`方法根据此字段存在与否来获取节点。 |
+| navi | Object | 可选，导航字段。`getNavi()`方法根据此字段存在与否来获取节点。 |
+| parentName | String | 可选，用于配合父级节点使用。一般情况下通过层级自动匹配。自定义设置后，将按配置优先。|
+| level | Number | 保留字段，内部使用。记录和计算节点所在层级。 |
+| children | Array<Node> | 保留字段，内部使用。子节点集合。 |
 
 ## 开发（Develop）
 

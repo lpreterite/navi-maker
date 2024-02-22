@@ -1,3 +1,5 @@
+let _debug=false;
+
 function findNode(target, nodes = []) {
   return nodes
     .map((node) =>
@@ -17,149 +19,194 @@ function findNodePath(target, nodes = []) {
     .flat();
 }
 
-function stuff(tree, nodes, opts={}){
+function serialize(input){
   const nodeTypes = ['string','array', 'object']
+  const type = typeof input == 'string' ? 0 : [String,Array,Object].findIndex(constructor=>input instanceof constructor)
+  let node;
+  switch(type){
+    case 0:
+      node = { name: input, nodeType:nodeTypes[type], children:[] }
+      break;
+    case 1:
+      node = { name: input[0], nodeType:nodeTypes[type], children:input[1]||[]  }
+      break;
+    case 2:
+      node = {
+        ...input,
+        children:input.children||[],
+        nodeType:nodeTypes[type],
+      }
+      if(typeof node.name === 'undefined'){ throw new Error("树节点为Object时，必须带上name属性") }
+      break;
+  }
+  return node
+}
+
+const stuffDefaultHandler = ({node,targetName,level,nodes}, {stuff,handler}={})=>{
+  const result = nodes.find(node=>node.name==targetName)
+  return {
+    ...node,
+    ...result,
+    level,
+    children: stuff(node.children, nodes, {level:level+1, handler})
+  }
+}
+/**
+ * 填充数据函数
+ *
+ * @param {Array} tree 目标树
+ * @param {Array} nodes 查找节点集合
+ * @param {Object} [opts={}]
+ * @param {Function} opts.handler 填充函数
+ * @returns 返回目标树结构
+ */
+function stuff(tree, nodes, opts={}){
   const {
-    handler=({targetName,nodes})=>nodes.find(node=>node.name==targetName),
+    handler=stuffDefaultHandler,
     level=0
   } = opts
   return tree.map(nodeName=>{
-    const getNode = opts=>handler(opts)
-    const type = typeof nodeName == 'string' ? 0 : [String,Array,Object].findIndex(constructor=>nodeName instanceof constructor)
-    let result, node;
-    switch(type){
-      case 0:
-        node = { name: nodeName, nodeType:nodeTypes[type] }
-        result = getNode({targetName:nodeName,level,nodes,node})
-        break;
-      case 1:
-        node = { name: nodeName[0], nodeType:nodeTypes[type], children:nodeName[1]  }
-        result = getNode({targetName:nodeName[0],level,nodes, node})
-        result&&(result.children = stuff(nodeName[1], nodes, {level:level+1, handler}))
-        break;
-      case 2:
-        node = { nodeType:nodeTypes[type], children:[], ...(nodeName||{}) }
-        if(typeof node.name === 'undefined'){ throw new Error("树节点为Object时，必须带上name属性") }
-        result = getNode({targetName:node.name,level,nodes, node})
-        result&&(result.children = stuff(node.children, nodes, {level:level+1, handler}))
-        break;
-    }
-    if(!result) throw new Error(`在Nodes资源中找不到名为${nodeName}的节点！`)
+    const node = serialize(nodeName)
+    let result = handler({targetName:node.name,level,nodes,node}, {stuff, handler});
+    // result&&(result.children = stuff(node.children, nodes, {level:level+1, handler}))
+    // if(!result) throw new Error(`在Nodes资源中找不到名为${nodeName}的节点！`)
     return result
   })
 }
+stuff.stuffDefaultHandler = stuffDefaultHandler
 
-function NaviMaker() {
-  let _nodes = [],
-    _naviRelation,
-    _routeRelation;
+/**
+ * 扁平树状结构
+ *
+ * @param {Array} tree 树状结构
+ * @returns 输出扁平结构
+ */
+function flat(tree){
+  return tree.map(node=>{
+    return [node,...flat((node.children||[]).map(i=>({...i,parentName:i.parentName||node.name})))]
+  }).flat(Infinity).map(({children,...i})=>({...i}))
+}
 
-  const rules = {
-    navi: {
-      //遍历节点，并处理输出的方法
-      handler({node,targetName,nodes,level,type}){
-        let result = nodes.find(node=>node.name==targetName)
-        if(!!result){
-          const { title,redirect } = result.meta
-          result = {
-            ...result,
-            ...(node||{}),
-            level,
-            type,
-            title,
-            path: (node||{}).path || redirect,
-            children: result.children||[],
-          }
-        }
-        return result ? result : undefined
-      }
-    },
-    route: {
-      //遍历节点，并处理输出的方法
-      handler({targetName,nodes}){
-        let node = nodes.find(node=>node.name==targetName)
-        return node ? { ...node, children:node.children||[] } : undefined
-      }
-    },
-    crumb: {
-      //遍历节点，并处理输出的方法
-      handler({node,targetName,nodes,level}){
-        let result = nodes.find(node=>node.name==targetName)
-        if(!!result){
-          const {title,redirect} = result.meta||{}
-          result = {
-            ...result,
-            ...(node||{}),
-            level,
-            title,
-            path: (node||{}).path || redirect
-          }
-        }
-        return result ? result : undefined
-      }
-    },
-    sitemap: {
-      handler(node){
-        return node
-      }
-    }
-  };
+/**
+ * 组合函数
+ *
+ * @description 根据父级节点的离散数据再组合
+ * @param {*} nodes 扁平结构
+ * @returns tree输出树状结构
+ */
+function combo(nodes, tree){
+  if(_debug) console.group("combo")
+  //TODO:自上往下找，父节点不具有路由属性时，会被整个剪肢；搜索需要改为自下而上搜索。
+  //解决剪枝问题：找到落单节点，然后找到他们所有父辈，判断最近一代父辈后，在填充过程添加落单节点。
 
-  function init({ navi = [], routes = [], nodes = [] }={}) {
-    _nodes = nodes;
-    _naviRelation = navi;
-    _routeRelation = routes;
-  }
+  const bePruned = nodes
+    .filter(i=>nodes.findIndex(n=>i.parentName==n.name)==-1)
+    .map(i=>{
+      const nodePaths = findNodePath(i.parentName, tree)
+      const parentName = nodePaths.map(i=>i.name).reduce((result,name)=>nodes.find(i=>i.name==name) ? name : result,'')
+      return Object.fromEntries([["parentName", parentName],["name", i.name]])
+    })
 
-  const ctx = {
-    init,
-    getNavi(navi=_naviRelation, handler = rules.navi.handler) {
-      const args = Array.from(arguments)
-      if(args.length == 1 && typeof args[0]=='function'){
-        [navi,handler] = [_naviRelation,...args]
-      }
-      return stuff(navi, _nodes, {handler: handler})
-    },
-    getRoute(route=_routeRelation, handler = rules.route.handler) {
-      const args = Array.from(arguments)
-      if(args.length == 1 && typeof args[0]=='function'){
-        [route,handler] = [_routeRelation,...args]
-      }
-      return stuff(route, _nodes, {handler: handler})
-    },
-    getCrumb(nodeName, handler = rules.crumb.handler) {
-      const naviNodes = stuff(_naviRelation, _nodes, {handler: handler})
-      return findNodePath(nodeName, naviNodes)
-    },
-    getSitemap(handler = rules.sitemap.handler) {
-      return _nodes.map(handler);
-    },
-  };
-
-  Object.defineProperties(ctx, {
-    navi:{
-      get:()=>_naviRelation,
-      set:val=>_naviRelation=val
-    },
-    routes:{
-      get:()=>_routeRelation,
-      set:val=>_routeRelation=val
-    },
-    notes:{
-      get:()=>_nodes
-    },
+  //跟新节点父级标记
+  nodes = nodes.map(node=>{
+    const pruned = bePruned.find(i=>i.name==node.name)
+    return { ...node, parentName: pruned?pruned.parentName:node.parentName }
   })
 
-  return ctx;
+  if(_debug) console.log("bePruned",bePruned, nodes)
+
+  const minLevel = nodes.reduce((result, next)=>Math.min(result,next.level),Infinity)
+  const handler = ({node,targetName,level,nodes}, {stuff,handler}={})=>{
+    const children = nodes.filter(i=>i.parentName == targetName)
+    node.children = stuff(children, nodes, { handler })
+    return node
+  }
+
+  if(_debug) console.groupEnd("combo")
+
+  return stuff(nodes, nodes, { handler }).filter(i=>i.level<=minLevel)
 }
 
-const naviMaker = new NaviMaker()
+
+function markTree(nodes, opts={}){
+  const { stuffHandler=stuffDefaultHandler, filterHandler=()=>true } = opts
+  const tree = stuff(nodes, [], {handler:stuffHandler})
+  const sitemap = flat(tree)
+  const result = combo(sitemap.filter(filterHandler), tree)
+  if(_debug) console.log("markTree", result)
+  return result
+}
+
+function getNavi(nodes) {
+  if(_debug) console.group("navi")
+  const tree = markTree(nodes, {
+    stuffHandler: ({node,targetName,level,nodes}, {stuff,handler}={})=>{
+      /** 当navi项有自定义的父级时保留设置。在combo阶段会根据父级组合起来。 */
+      const { navi={} } = node
+      const result = {
+        ...node,
+        ...(!!navi.parentName?{parentName:navi.parentName}:{}),
+        level,
+        children: stuff(node.children, nodes, {level:level+1, handler})
+      }
+      return result
+    },
+    filterHandler: i=>typeof i.navi != 'undefined'
+  })
+  if(_debug) console.groupEnd("navi")
+  return tree
+}
+
+function getRoute(nodes) {
+  if(_debug) console.group("route")
+  const tree = markTree(nodes, {
+    stuffHandler: ({node,targetName,level,nodes}, {stuff,handler}={})=>{
+      /** 当route项有自定义的父级时保留设置。在combo阶段会根据父级组合起来。 */
+      const { route={} } = node
+      return {
+        ...node,
+        ...(!!route.parentName?{parentName:route.parentName}:{}),
+        level,
+        children: stuff(node.children, nodes, {level:level+1, handler})
+      }
+    },
+    filterHandler: i=>typeof i.route != 'undefined'
+  })
+  if(_debug) console.groupEnd("route")
+  return tree
+}
+
+function getCrumb(nodeName, navi) {
+  return findNodePath(nodeName, navi)
+}
+
+function getSitemap(tree){
+  return flat(tree)
+}
+
+function debug(val){
+  _debug = val
+}
+
+const ctx = {
+  debug,
+  getNavi,
+  getRoute,
+  getCrumb,
+  getSitemap,
+}
 
 export {
-  naviMaker,
-  NaviMaker,
+  debug,
   stuff,
+  flat,
+  combo,
   findNode,
-  findNodePath
+  findNodePath,
+  markTree,
+  getNavi,
+  getRoute,
+  getCrumb,
+  getSitemap,
 }
-export default naviMaker;
+export default ctx;
