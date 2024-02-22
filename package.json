@@ -1,6 +1,6 @@
 {
   "name": "@packy-tang/navi-maker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "配一次导航生成路由、面包屑、网站地图数据",
   "main": "dist/navi-maker.cjs.js",
   "module": "dist/navi-maker.esm.js",

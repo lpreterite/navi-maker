@@ -2,6 +2,17 @@
 
 
 
+## [2.0.0](https://github.com/lpreterite/navi-maker/compare/1.0.0...2.0.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* 重定义输入结构和输出方式[BREAKING CHANGE]
+
+### ✨ Features | 新功能
+
+* 重定义输入结构和输出方式[BREAKING CHANGE] ([ef3fba5](https://github.com/lpreterite/navi-maker/commit/ef3fba5a6143680dfbd5d16a546ac292a8171b0e))
+
 ## 1.0.0 (2024-02-04)
 
 
