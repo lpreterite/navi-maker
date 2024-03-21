@@ -134,6 +134,7 @@ describe('NaviMaker', () => {
 
   const naviJSONPath = path.resolve(__dirname,"../navi.json")
   const routeJSONPath = path.resolve(__dirname,"../route.json")
+  const sitemapJSONPath = path.resolve(__dirname,"../sitemap.json")
   fs.access(naviJSONPath, fs.constants.R_OK | fs.constants.W_OK, err=>{
     if(!err) fs.unlinkSync(naviJSONPath)
     fs.writeFile(naviJSONPath, JSON.stringify(navi), {flag:'a'}, ()=>{})
@@ -141,6 +142,10 @@ describe('NaviMaker', () => {
   fs.access(routeJSONPath, fs.constants.R_OK | fs.constants.W_OK, err=>{
     if(!err) fs.unlinkSync(routeJSONPath)
     fs.writeFile(routeJSONPath, JSON.stringify(routes), {flag:'a'}, ()=>{})
+  })
+  fs.access(sitemapJSONPath, fs.constants.R_OK | fs.constants.W_OK, err=>{
+    if(!err) fs.unlinkSync(sitemapJSONPath)
+    fs.writeFile(sitemapJSONPath, JSON.stringify(sitemap), {flag:'a'}, ()=>{})
   })
 
   function hasSomeKeys(obj,keys){
