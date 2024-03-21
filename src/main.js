@@ -110,7 +110,9 @@ function combo(nodes, tree){
   //跟新节点父级标记
   nodes = nodes.map(node=>{
     const pruned = bePruned.find(i=>i.name==node.name)
-    return { ...node, parentName: pruned?pruned.parentName:node.parentName }
+    const parentName = pruned ? pruned.parentName : node.parentName // 更新父级节点
+    const level = pruned && pruned.parentName=='' ? 0 : node.level // 没有父级时为根节点，level设为0
+    return { ...node, parentName, level }
   })
 
   if(_debug) console.log("bePruned",bePruned, nodes)
