@@ -2,6 +2,18 @@
 
 
 
+### [2.0.1](https://github.com/lpreterite/navi-maker/compare/2.0.0...2.0.1) (2024-03-21)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 修复组合树时，没有父级时定义根节点，将level设为0 ([0370d78](https://github.com/lpreterite/navi-maker/commit/0370d78b9cc8ce42e7a248dd28bdb2280619c709))
+
+
+### ⚡ Performance Improvements | 性能优化
+
+* 优化寻找节点的函数 ([a806a8e](https://github.com/lpreterite/navi-maker/commit/a806a8ec92edcc59636d90d2a5bfcda766502406))
+
 ## [2.0.0](https://github.com/lpreterite/navi-maker/compare/1.0.0...2.0.0) (2024-02-22)
 
 
