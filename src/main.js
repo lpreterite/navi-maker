@@ -1,22 +1,35 @@
 let _debug=false;
 
 function findNode(target, nodes = []) {
-  return nodes
-    .map((node) =>
-      node.name == target ? node : findNode(target, node.children)
-    )
-    .find((node) => (node || {}).name == target);
+  for (let node of nodes) {
+    if (node.name === target) {
+      return node;
+    }
+    if (node.children && node.children.length > 0) {
+      const found = findNode(target, node.children);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
 }
 
-function findNodePath(target, nodes = []) {
-  return nodes
-    .map((node) =>
-      node.name == target
-        ? [node]
-        : [node, findNodePath(target, node.children)].flat(Infinity)
-    )
-    .filter((nodes) => nodes.find((node) => node.name == target))
-    .flat();
+function findNodePath(target, nodes = [], path = []) {
+  for (let node of nodes) {
+    path.push(node);
+    if (node.name === target) {
+      return path;
+    }
+    if (node.children) {
+      let result = findNodePath(target, node.children, path);
+      if (result.length>0) {
+        return result;
+      }
+    }
+    path.pop();
+  }
+  return [];
 }
 
 function serialize(input){
@@ -81,10 +94,17 @@ stuff.stuffDefaultHandler = stuffDefaultHandler
  * @param {Array} tree 树状结构
  * @returns 输出扁平结构
  */
-function flat(tree){
-  return tree.map(node=>{
-    return [node,...flat((node.children||[]).map(i=>({...i,parentName:i.parentName||node.name})))]
-  }).flat(Infinity).map(({children,...i})=>({...i}))
+function flat(tree = []) {
+  if (!Array.isArray(tree)) {
+    throw new Error("Input must be an array");
+  }
+
+  return tree.flatMap(node => {
+    const children = node.children || [];
+    const newNode = { ...node, children: undefined };
+    const childNodes = flat(children.map(child => ({ ...child, parentName: child.parentName || node.name })));
+    return [newNode, ...childNodes];
+  });
 }
 
 /**
@@ -104,7 +124,7 @@ function combo(nodes, tree){
     .map(i=>{
       const nodePaths = findNodePath(i.parentName, tree)
       const parentName = nodePaths.map(i=>i.name).reduce((result,name)=>nodes.find(i=>i.name==name) ? name : result,'')
-      return Object.fromEntries([["parentName", parentName],["name", i.name]])
+      return { parentName, name: i.name }
     })
 
   //跟新节点父级标记
