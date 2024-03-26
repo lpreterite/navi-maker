@@ -2,6 +2,13 @@
 
 
 
+### [2.0.2](https://github.com/lpreterite/navi-maker/compare/2.0.1...2.0.2) (2024-03-26)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 修复获得网站地图时补充节点父节点和层级属性 ([b3d8937](https://github.com/lpreterite/navi-maker/commit/b3d8937ecbca198a35352e7a9d56a62a51d9ad17))
+
 ### [2.0.1](https://github.com/lpreterite/navi-maker/compare/2.0.0...2.0.1) (2024-03-21)
 
 
