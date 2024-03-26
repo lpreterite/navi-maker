@@ -73,7 +73,7 @@ const stuffDefaultHandler = ({node,targetName,level,nodes}, {stuff,handler}={})=
  * @param {Function} opts.handler 填充函数
  * @returns 返回目标树结构
  */
-function stuff(tree, nodes, opts={}){
+function stuff(tree, nodes=[], opts={}){
   const {
     handler=stuffDefaultHandler,
     level=0
@@ -203,7 +203,7 @@ function getCrumb(nodeName, navi) {
 }
 
 function getSitemap(tree){
-  return flat(tree)
+  return flat(markTree(nodes))
 }
 
 function debug(val){
