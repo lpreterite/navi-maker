@@ -2,6 +2,13 @@
 
 
 
+### [2.0.3](https://github.com/lpreterite/navi-maker/compare/2.0.2...2.0.3) (2024-06-21)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 修复调用getSitemap报错 ([565b6e5](https://github.com/lpreterite/navi-maker/commit/565b6e5d93ac0c02f740465e99d28021e3786aa9))
+
 ### [2.0.2](https://github.com/lpreterite/navi-maker/compare/2.0.1...2.0.2) (2024-03-26)
 
 
