@@ -203,7 +203,7 @@ function getCrumb(nodeName, navi) {
 }
 
 function getSitemap(tree){
-  return flat(markTree(nodes))
+  return flat(markTree(tree))
 }
 
 function debug(val){
